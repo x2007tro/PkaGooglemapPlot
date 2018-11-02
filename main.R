@@ -2,29 +2,31 @@ library(magrittr)
 ##
 # Plot function
 ##
-PlotOnGmap <- function(dataset, name_col, lat_col, lon_col, gmap_key, gmap_style){
+PlotOnGmap <- function(dataset, dataset2, name_col, lat_col, lon_col, gmap_key, gmap_style){
   tmp <- googleway::google_map(
     key = gmap_key,
     data = dataset,
     location = c(45.964993, -66.646332),  # Fallback option: Fredericton,
     styles = gmap_style,
-    zoom = 15
+    zoom = 12
   ) %>% 
-    # googleway::add_markers(
-    #   lat = "Y", 
-    #   lon = "X",
-    #   colour = "color_choice",
-    #   #marker_icon = "icon_url",
-    #   info_window = "Type",
-    #   update_map_view = FALSE
-    # ) %>% 
     googleway::add_heatmap(
       lat = "Y", 
       lon = "X",
-      option_radius = 0.005,
-      #option_gradient = c('orange', 'blue', 'mediumpurple4', 'snow4', 'thistle1'),
+      option_radius = 0.003,
+      option_gradient = viridis::plasma(256, alpha = 0.8, begin = 0.5, end = 1, direction = 1),
       option_opacity = 0.8
+    ) %>% 
+    googleway::add_markers(
+      data = dataset2,
+      lat = "Y",
+      lon = "X",
+      colour = "color_choice",
+      #marker_icon = "icon_url",
+      info_window = "Type",
+      update_map_view = FALSE
     )
+    
   
   return(tmp)
 }
@@ -34,373 +36,16 @@ PlotOnGmap <- function(dataset, name_col, lat_col, lon_col, gmap_key, gmap_style
 # Parameters
 ##
 data_dir <- "./Dataset/"
+map_style_dir <- "./MapStyle/"
 gmap_api_key <- "AIzaSyBqXn0BmOkn5mCtyhpHh2ROPHX8YfVS-bg"
-gmap_custom_style <- 
-'[
-    {
-"featureType": "all",
-"elementType": "all",
-"stylers": [
-{
-  "visibility": "on"
-}
-]
-},
-{
-  "featureType": "all",
-  "elementType": "labels",
-  "stylers": [
-  {
-  "visibility": "off"
-  },
-  {
-  "saturation": "-100"
-  }
-  ]
-},
-  {
-  "featureType": "all",
-  "elementType": "labels.text.fill",
-  "stylers": [
-  {
-  "saturation": 36
-  },
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 40
-  },
-  {
-  "visibility": "off"
-  }
-  ]
-  },
-  {
-  "featureType": "all",
-  "elementType": "labels.text.stroke",
-  "stylers": [
-  {
-  "visibility": "off"
-  },
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 16
-  }
-  ]
-  },
-  {
-  "featureType": "all",
-  "elementType": "labels.icon",
-  "stylers": [
-  {
-  "visibility": "off"
-  }
-  ]
-  },
-  {
-  "featureType": "administrative",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 20
-  }
-  ]
-  },
-  {
-  "featureType": "administrative",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 17
-  },
-  {
-  "weight": 1.2
-  }
-  ]
-  },
-  {
-  "featureType": "landscape",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 20
-  }
-  ]
-  },
-  {
-  "featureType": "landscape",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#4d6059"
-  }
-  ]
-  },
-  {
-  "featureType": "landscape",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#4d6059"
-  }
-  ]
-  },
-  {
-  "featureType": "landscape.natural",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#4d6059"
-  }
-  ]
-  },
-  {
-  "featureType": "poi",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "lightness": 21
-  }
-  ]
-  },
-  {
-  "featureType": "poi",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#4d6059"
-  }
-  ]
-  },
-  {
-  "featureType": "poi",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#4d6059"
-  }
-  ]
-  },
-  {
-  "featureType": "road",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "visibility": "on"
-  },
-  {
-  "color": "#7f8d89"
-  }
-  ]
-  },
-  {
-  "featureType": "road",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  }
-  ]
-  },
-  {
-  "featureType": "road.highway",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  },
-  {
-  "lightness": 17
-  }
-  ]
-  },
-  {
-  "featureType": "road.highway",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  },
-  {
-  "lightness": 29
-  },
-  {
-  "weight": 0.2
-  }
-  ]
-  },
-  {
-  "featureType": "road.arterial",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 18
-  }
-  ]
-  },
-  {
-  "featureType": "road.arterial",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  }
-  ]
-  },
-  {
-  "featureType": "road.arterial",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  }
-  ]
-  },
-  {
-  "featureType": "road.local",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 16
-  }
-  ]
-  },
-  {
-  "featureType": "road.local",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  }
-  ]
-  },
-  {
-  "featureType": "road.local",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#7f8d89"
-  }
-  ]
-  },
-  {
-  "featureType": "transit",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "color": "#000000"
-  },
-  {
-  "lightness": 19
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "all",
-  "stylers": [
-  {
-  "color": "#2b3638"
-  },
-  {
-  "visibility": "on"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "geometry",
-  "stylers": [
-  {
-  "color": "#2b3638"
-  },
-  {
-  "lightness": 17
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "geometry.fill",
-  "stylers": [
-  {
-  "color": "#24282b"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "geometry.stroke",
-  "stylers": [
-  {
-  "color": "#24282b"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "labels",
-  "stylers": [
-  {
-  "visibility": "off"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "labels.text",
-  "stylers": [
-  {
-  "visibility": "off"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "labels.text.fill",
-  "stylers": [
-  {
-  "visibility": "off"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "labels.text.stroke",
-  "stylers": [
-  {
-  "visibility": "off"
-  }
-  ]
-  },
-  {
-  "featureType": "water",
-  "elementType": "labels.icon",
-  "stylers": [
-  {
-  "visibility": "off"
-  }
-  ]
-  }
-  ]'
+map_style_name <- c("assassin_creed","matriarchy","black_and_white","blue","blue_essence",
+                    "gowalla","hcre","hopper","multibrand_network","simplex","teal_map")  # 3,4,6,10,
+gmap_custom_style <- readr::read_file(paste0(map_style_dir, map_style_name[10], ".js"))
+color_map <- data.frame(
+  no_killed = 1:4,
+  color_choice = c("blue", "lavender", "green", "red"),
+  stringsAsFactors = FALSE
+)
 
 ##
 # Workflow
@@ -462,17 +107,65 @@ by_day_of_week <- dataset_clean %>%
   dplyr::group_by(DayOfWeek) %>% 
   dplyr::summarise(Count = n())
 
+# count by hour
+# comment: off-work time definitely wins here
+by_hour <- dataset_clean %>% 
+  dplyr::group_by(Hour_) %>% 
+  dplyr::summarise(Count = n())
+
+# count by day of week and hour
+# comment: off-work time definitely wins here
+by_day_of_week_and_hour <- dataset_clean %>% 
+  dplyr::group_by(DayOfWeek, Hour_) %>% 
+  dplyr::summarise(Count = n())
+
+# count by street
+# comment: not much info, regent and prospect is the winner
+by_street <- dataset_clean %>% 
+  dplyr::group_by(Street) %>% 
+  dplyr::summarise(Count = n())
+
+# count by type
+# comment: suprising that a lot of parking lot accident
+by_type <- dataset_clean %>% 
+  dplyr::group_by(Type) %>% 
+  dplyr::summarise(Count = n())
+
 ##
 # Second wave of plot
-color_map <- data.frame(
-  no_injury = 2:5,
-  color_choice = c("green", "blue", "lavender", "red"),
-  stringsAsFactors = FALSE
-)
 dataset_injuried <- dataset_clean %>% 
-  dplyr::filter(NoInjured > 1) %>% 
-  dplyr::inner_join(color_map, by = c("NoInjured" = "no_injury")) %>% 
-  dplyr::mutate(icon_url = "./Icon/Market/m1.png")
+  dplyr::filter(NoInjured > 1 | NoKilled > 0) %>% 
+  dplyr::mutate(icon_url = "./Icon/Marker/m1.png")
+
+# create marker data
+dataset_marker <- dataset_injuried %>% 
+  dplyr::filter(NoKilled > 0) %>%
+  dplyr::inner_join(color_map, by = c("NoKilled" = "no_killed"))
 
 dataset_final <- dataset_injuried
-final_plot <- PlotOnGmap(dataset = dataset_final, gmap_key = gmap_api_key, gmap_style = gmap_custom_style)
+
+final_plot <- PlotOnGmap(
+  dataset = dataset_final, 
+  dataset2 = dataset_marker, 
+  gmap_key = gmap_api_key, 
+  gmap_style = gmap_custom_style
+)
+
+##
+# Westmorland bridge plot
+dataset_bridge <- dataset_clean %>% 
+  dplyr::filter(Street == "Westmorland Street Bridge" | Near == "Westmorland Street Bridge")
+
+# create marker data
+dataset_marker <- dataset_bridge %>% 
+  dplyr::filter(NoInjured > 0) %>%
+  dplyr::inner_join(color_map, by = c("NoInjured" = "no_killed"))
+
+dataset_final <- dataset_bridge
+
+bridge_plot <- PlotOnGmap(
+  dataset = dataset_final, 
+  dataset2 = dataset_marker, 
+  gmap_key = gmap_api_key, 
+  gmap_style = gmap_custom_style
+)
